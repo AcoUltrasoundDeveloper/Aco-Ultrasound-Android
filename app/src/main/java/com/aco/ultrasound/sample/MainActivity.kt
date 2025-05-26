@@ -23,21 +23,30 @@ class MainActivity : AppCompatActivity() {
     }
     private val acoProbeAdapter: AcoProbeAdapter = AcoProbeAdapter().apply {
         onStreamingClick = { acoProbe ->
+            AcoUltrasound.stopDiscoverProbes()
             val intent = Intent(this@MainActivity, AcoUltraSoundSampleActivity::class.java)
             startActivity(intent)
         }
     }
 
     private lateinit var locationPermissionRequest: ActivityResultLauncher<Array<String>>
-    private val requiredPermissionArray: Array<String> = arrayOf(
-        Manifest.permission.CHANGE_WIFI_STATE,
-        Manifest.permission.CHANGE_NETWORK_STATE,
-        Manifest.permission.ACCESS_WIFI_STATE,
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.ACCESS_NETWORK_STATE,
-        Manifest.permission.CHANGE_WIFI_MULTICAST_STATE
-    )
+    private val requiredPermissionArray: Array<String> by lazy {
+        val basePermissions = arrayOf(
+            Manifest.permission.CHANGE_WIFI_STATE,
+            Manifest.permission.CHANGE_NETWORK_STATE,
+            Manifest.permission.ACCESS_WIFI_STATE,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_NETWORK_STATE,
+            Manifest.permission.CHANGE_WIFI_MULTICAST_STATE,
+        )
+
+        if (android.os.Build.VERSION.SDK_INT >= 33) {
+            basePermissions + Manifest.permission.NEARBY_WIFI_DEVICES
+        } else {
+            basePermissions
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

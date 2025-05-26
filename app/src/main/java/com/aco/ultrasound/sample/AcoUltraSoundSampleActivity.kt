@@ -1,12 +1,21 @@
 package com.aco.ultrasound.sample
 
 import android.app.AlertDialog
+import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
+import androidx.core.graphics.get
+import androidx.core.graphics.set
+import androidx.lifecycle.lifecycleScope
 import com.aco.ultrasound.AcoProbe
 import com.aco.ultrasound.AcoUltrasound
 import com.aco.ultrasound.sample.databinding.ActivityAcoUltraSoundSampleBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Created by mr.chihlungchen on 2024/7/14, Hey Yo Man!
@@ -18,6 +27,8 @@ class AcoUltraSoundSampleActivity : ComponentActivity() {
     private val viewBinding: ActivityAcoUltraSoundSampleBinding by lazy {
         ActivityAcoUltraSoundSampleBinding.inflate(layoutInflater)
     }
+
+    private val streamChannel = Channel<Bitmap>(Channel.CONFLATED)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,9 +43,23 @@ class AcoUltraSoundSampleActivity : ComponentActivity() {
 
         acoProbe.also { acoProbe ->
             acoProbe.onStreamingListener = { streamingData ->
-                viewBinding.imageView.setImageBitmap(streamingData.bitmap)
+                lifecycleScope.launch(Dispatchers.Default) {
+                    streamChannel.send(streamingData.bitmap)
+                }
             }
             acoProbe.streaming()
+        }
+
+        lifecycleScope.launch(Dispatchers.Default) {
+            for (frame in streamChannel) {
+                // You can choose either flipping method below to observe the difference in processing speed,
+                // which directly affects the smoothness of the ultrasound stream.
+                //val processedImage = slowFlip(frame)
+                 //val processedImage = fastFlip(frame)
+                withContext(Dispatchers.Main) {
+                    viewBinding.imageView.setImageBitmap(frame)
+                }
+            }
         }
 
         viewBinding.setGainButton.setOnClickListener {
