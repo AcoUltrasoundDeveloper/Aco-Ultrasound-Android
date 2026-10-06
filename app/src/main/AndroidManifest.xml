@@ -17,9 +17,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AcoUltrasoundSample"
-            tools:ignore="LockedOrientationActivity">
+            android:theme="@style/Theme.AcoUltrasoundSample">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,9 +25,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".AcoUltraSoundSampleActivity"
-            android:screenOrientation="portrait"
-            tools:ignore="LockedOrientationActivity" />
+            android:name=".AcoUltraSoundSampleActivity" />
     </application>
 
 </manifest>

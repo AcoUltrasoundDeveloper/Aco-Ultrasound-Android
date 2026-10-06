@@ -36,20 +36,24 @@ class AcoProbeAdapter : RecyclerView.Adapter<AcoProbeViewHolder>() {
         viewHolder.viewBinding.ssidText.text = acoProbe.getConfig().ssid
         viewHolder.viewBinding.macText.text = acoProbe.getConfig().mac
         viewHolder.viewBinding.connectButton.setOnClickListener {
-            AlertDialog.Builder(viewHolder.itemView.context)
-                .apply {
-                    val editText = EditText(viewHolder.itemView.context)
-                    setTitle("Key")
-                    setView(editText)
-                    setPositiveButton("OK") { dialog, _ ->
-                        dialog.dismiss()
-                        acoProbe.connect("${editText.text}")
+            // Try the key remembered from a previous successful connect first; only prompt
+            // if none was saved, or the saved one is no longer valid.
+            if (!acoProbe.connectWithSavedLicenseKey()) {
+                AlertDialog.Builder(viewHolder.itemView.context)
+                    .apply {
+                        val editText = EditText(viewHolder.itemView.context)
+                        setTitle("Key")
+                        setView(editText)
+                        setPositiveButton("OK") { dialog, _ ->
+                            dialog.dismiss()
+                            acoProbe.connect("${editText.text}")
+                        }
+                        setNegativeButton("Cancel") { dialog, _ ->
+                            dialog.dismiss()
+                        }
                     }
-                    setNegativeButton("Cancel") { dialog, _ ->
-                        dialog.dismiss()
-                    }
-                }
-                .show()
+                    .show()
+            }
         }
         viewHolder.viewBinding.disconnectButton.setOnClickListener {
             acoProbe.disconnect()
